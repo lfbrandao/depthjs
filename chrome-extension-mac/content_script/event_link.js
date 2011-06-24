@@ -4,9 +4,22 @@ console.log("DepthJS: Loading Event Link");
 
 DepthJS.eventLink.initPort = function() {
   if (DepthJS.verbose) console.log("DepthJS: Event link init");
-  DepthJS.eventLink.domPort = $("<div id='DepthJS_eventPort' style='display:none'></div>");
+  DepthJS.eventLink.domPort = null;
+  var checkForEventPort = function() {
+    var $eventPort = $("#DepthJS_eventPort")
+    if ($eventPort.length > 0 ) {
+      console.log("DepthJS: Registering eventPort on DepthJS supported web page");
+      DepthJS.eventLink.domPort = $eventPort;
+      DepthJS.eventLink.onEvent({type: "KinectInit", data:{}});
+      return true;
+    }
+    return false;
+  };
   $(function() {
-    DepthJS.eventLink.domPort.appendTo("body");
+    if (!checkForEventPort()) {
+      // try again in 300msec
+      setTimeout(checkForEventPort, 300);
+    }
   });
   DepthJS.browser.addContentScriptListener("event", DepthJS.eventLink.onEvent);
 };
